@@ -69,8 +69,6 @@
 #include <linux/workqueue.h>
 #include <linux/acpi.h>
 #include <linux/slab.h>
-#include <acpi/acpi_drivers.h>
-#include <acpi/acpi_bus.h>
 #include <linux/uaccess.h>
 #include <linux/sonypi.h>
 #include <linux/sony-laptop.h>
@@ -1418,8 +1416,6 @@ static int sony_nc_rfkill_set(void *data, bool blocked)
 	if (((long) data == SONY_WWAN) && !(result & 0x2)) {
 		if (!blocked) {
 			/* notify user space: the battery must be present */
-			acpi_bus_generate_proc_event(sony_nc_acpi_device,
-				       2, 2);
 			acpi_bus_generate_netlink_event(
 					sony_nc_acpi_device->pnp.device_class,
 					dev_name(&sony_nc_acpi_device->dev),
@@ -2278,8 +2274,6 @@ static int sony_nc_als_update_status(struct backlight_device *bd)
 						KOBJ_CHANGE, env);
 
 			dprintk("generating ALS event 3 (reason: 2)\n");
-			acpi_bus_generate_proc_event(sony_nc_acpi_device,
-					3, 2);
 			acpi_bus_generate_netlink_event(
 					sony_nc_acpi_device->pnp.device_class,
 					dev_name(&sony_nc_acpi_device->dev),
@@ -4523,7 +4517,6 @@ static void sony_nc_notify(struct acpi_device *device, u32 event)
 		sony_laptop_report_input_event(event);
 	}
 
-	acpi_bus_generate_proc_event(device, ev, value);
 	acpi_bus_generate_netlink_event(device->pnp.device_class,
 					dev_name(&device->dev), ev, value);
 }
@@ -6059,7 +6052,6 @@ static irqreturn_t sony_pic_irq(int irq, void *dev_id)
 
 found:
 	sony_laptop_report_input_event(device_event);
-	acpi_bus_generate_proc_event(dev->acpi_dev, 1, device_event);
 	sonypi_compat_report_event(device_event);
 	return IRQ_HANDLED;
 }
